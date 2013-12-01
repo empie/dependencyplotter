@@ -37,8 +37,25 @@ public class DependencyPlotter {
 
 		GraphViz gv = new GraphViz();
 		gv.addln(gv.start_graph());
+
 		gv.addln("A -> B;");
 		gv.addln("A -> C;");
+
+		for (Artifact artifact : usedAndDeclaredDependencies) {
+			gv.addln("\"" + mavenProjectToAnalyze.getGroupId() + ":" + mavenProjectToAnalyze.getArtifactId() + "\" -> \""
+					+ artifact.getGroupId() + ":" + artifact.getArtifactId() + "\";");
+		}
+
+		for (Artifact artifact : usedButUndeclaredDependencies) {
+			gv.addln("\"" + mavenProjectToAnalyze.getGroupId() + ":" + mavenProjectToAnalyze.getArtifactId() + "\" -> \""
+					+ artifact.getGroupId() + ":" + artifact.getArtifactId() + "\";");
+		}
+
+		for (Artifact artifact : unusedButDeclaredDependencies) {
+			gv.addln("\"" + mavenProjectToAnalyze.getGroupId() + ":" + mavenProjectToAnalyze.getArtifactId() + "\" -> \""
+					+ artifact.getGroupId() + ":" + artifact.getArtifactId() + "\";");
+		}
+
 		gv.addln(gv.end_graph());
 		String dotSource = gv.getDotSource();
 		System.out.println(dotSource);

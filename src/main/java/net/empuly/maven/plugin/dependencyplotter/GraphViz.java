@@ -91,8 +91,8 @@ public class GraphViz {
 			graphVizProcess.waitFor();
 
 			FileUtils.copyFile(tempFileOutputImage, new File(OUTPUT_DIRECTORY, "output." + type));
-			FileUtils.forceDelete(tempFileOutputImage);
-			FileUtils.forceDelete(tempFileDotSource);
+			// FileUtils.forceDelete(tempFileOutputImage);
+			// FileUtils.forceDelete(tempFileDotSource);
 
 		} catch (java.io.IOException ioe) {
 			ioe.printStackTrace();
