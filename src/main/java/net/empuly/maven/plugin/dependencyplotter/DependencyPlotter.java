@@ -95,7 +95,7 @@ public class DependencyPlotter {
 			throws MojoExecutionException {
 		try {
 			ProjectDependencyAnalysis analysis = projectDependencyAnalyzer.analyze(mavenProjectToAnalyze);
-			return new DependencyPlotterProjectDependencyAnalysis(analysis);
+			return new DependencyPlotterProjectDependencyAnalysis(analysis, logger);
 
 		} catch (ProjectDependencyAnalyzerException exception) {
 			throw new MojoExecutionException("Cannot analyze dependencies", exception);

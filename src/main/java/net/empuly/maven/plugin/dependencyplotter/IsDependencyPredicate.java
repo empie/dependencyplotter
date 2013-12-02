@@ -15,7 +15,7 @@ public class IsDependencyPredicate implements Predicate<Artifact> {
 	}
 
 	public boolean apply(Artifact input) {
-		return input.getGroupId().equals(dependencyToFind.getGroupId()) && input.getArtifactId().equals(dependencyToFind.getGroupId());
+		return input.getGroupId().equals(dependencyToFind.getGroupId()) && input.getArtifactId().equals(dependencyToFind.getArtifactId());
 	}
 
 }

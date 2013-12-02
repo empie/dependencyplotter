@@ -4,18 +4,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 
 public class DependencyPlotterProjectDependencyAnalysis {
 
 	private ProjectDependencyAnalysis projectDependencyAnalysis;
+	private final Log logger;
 
-	public DependencyPlotterProjectDependencyAnalysis(ProjectDependencyAnalysis projectDependencyAnalysis) {
+	public DependencyPlotterProjectDependencyAnalysis(ProjectDependencyAnalysis projectDependencyAnalysis, Log logger) {
 		this.projectDependencyAnalysis = projectDependencyAnalysis;
+		this.logger = logger;
 	}
 
 	public Set<Artifact> getUnusedButDeclaredArtifacts() {
@@ -37,6 +41,7 @@ public class DependencyPlotterProjectDependencyAnalysis {
 
 	private void filterOnScopes(DependencyPlotterConfiguration dependencyPlotterConfiguration) {
 		if (dependencyPlotterConfiguration.ignoreAllButCompileDependenciesDuringAnalyzation()) {
+			logger.info("filtering all but compile");
 			filterAllButCompileScope();
 		} else {
 			filterOnIndividualScopes(dependencyPlotterConfiguration);
@@ -68,6 +73,7 @@ public class DependencyPlotterProjectDependencyAnalysis {
 	}
 
 	private void filterAllDependenciesInScope(String scopeToFilter) {
+		logger.info("filtering all dependencies in scope " + scopeToFilter);
 		Set<Artifact> unusedButDeclaredArtifacts = filterAllDependenciesInScope(projectDependencyAnalysis.getUnusedDeclaredArtifacts(),
 				scopeToFilter);
 		Set<Artifact> usedButUndeclaredArtifacts = filterAllDependenciesInScope(projectDependencyAnalysis.getUsedUndeclaredArtifacts(),
@@ -75,11 +81,15 @@ public class DependencyPlotterProjectDependencyAnalysis {
 		Set<Artifact> usedAndDeclaredArtifacts = filterAllDependenciesInScope(projectDependencyAnalysis.getUsedDeclaredArtifacts(),
 				scopeToFilter);
 
+		logger.info(usedAndDeclaredArtifacts.toString());
+		logger.info(usedButUndeclaredArtifacts.toString());
+		logger.info(unusedButDeclaredArtifacts.toString());
+
 		updateProjectDependencyAnalysis(usedAndDeclaredArtifacts, usedButUndeclaredArtifacts, unusedButDeclaredArtifacts);
 	}
 
 	private Set<Artifact> filterAllDependenciesInScope(Set<Artifact> artifactSetToFilter, String scopeToFilter) {
-		return new HashSet<Artifact>(Collections2.filter(artifactSetToFilter, new ScopeFilteringPredicate(scopeToFilter)));
+		return new HashSet<Artifact>(Collections2.filter(artifactSetToFilter, Predicates.not(new ArtifactIsScopePredicate(scopeToFilter))));
 	}
 
 	private void filterOnExclusions(DependencyPlotterConfiguration dependencyPlotterConfiguration) {
