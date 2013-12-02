@@ -41,7 +41,7 @@ public class DependencyPlotterProjectDependencyAnalysis {
 
 	private void filterOnScopes(DependencyPlotterConfiguration dependencyPlotterConfiguration) {
 		if (dependencyPlotterConfiguration.ignoreAllButCompileDependenciesDuringAnalyzation()) {
-			logger.info("filtering all but compile");
+			logger.info("filtering all but compile and keeping");
 			filterAllButCompileScope();
 		} else {
 			filterOnIndividualScopes(dependencyPlotterConfiguration);
