@@ -1,9 +1,7 @@
 package net.empuly.maven.plugin.dependencyplotter;
 
-import java.io.StringWriter;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -11,7 +9,6 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis;
 import org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzer;
 import org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException;
-import org.codehaus.plexus.util.xml.PrettyPrintXMLWriter;
 
 public class DependencyPlotter {
 
@@ -35,58 +32,27 @@ public class DependencyPlotter {
 		Set<Artifact> usedButUndeclaredDependencies = analysis.getUsedButUndeclaredArtifacts();
 		Set<Artifact> unusedButDeclaredDependencies = analysis.getUnusedButDeclaredArtifacts();
 
-		GraphViz gv = new GraphViz();
-		gv.addln(gv.start_graph());
-
-		gv.addln("A -> B;");
-		gv.addln("A -> C;");
+		GraphVizDependencyGraphBuilder graphBuilder = new GraphVizDependencyGraphBuilder(mavenProjectToAnalyze);
 
 		for (Artifact artifact : usedAndDeclaredDependencies) {
-			gv.addln("\"" + mavenProjectToAnalyze.getGroupId() + ":" + mavenProjectToAnalyze.getArtifactId() + "\" -> \""
-					+ artifact.getGroupId() + ":" + artifact.getArtifactId() + "\";");
+			graphBuilder.addUsedAndDeclaredDependency(artifact);
 		}
 
 		for (Artifact artifact : usedButUndeclaredDependencies) {
-			gv.addln("\"" + mavenProjectToAnalyze.getGroupId() + ":" + mavenProjectToAnalyze.getArtifactId() + "\" -> \""
-					+ artifact.getGroupId() + ":" + artifact.getArtifactId() + "\";");
+			graphBuilder.addUsedButUndeclaredDependency(artifact);
 		}
 
 		for (Artifact artifact : unusedButDeclaredDependencies) {
-			gv.addln("\"" + mavenProjectToAnalyze.getGroupId() + ":" + mavenProjectToAnalyze.getArtifactId() + "\" -> \""
-					+ artifact.getGroupId() + ":" + artifact.getArtifactId() + "\";");
+			graphBuilder.addUnusedButDeclaredDependency(artifact);
 		}
 
-		gv.addln(gv.end_graph());
-		String dotSource = gv.getDotSource();
+		String dotSource = graphBuilder.getDotSource();
 		System.out.println(dotSource);
 
 		String type = "gif";
 
-		gv.printGraph(dotSource, type);
-
-		if ((usedAndDeclaredDependencies.isEmpty()) && usedButUndeclaredDependencies.isEmpty() && unusedButDeclaredDependencies.isEmpty()) {
-			return false;
-		}
-
-		if (!usedAndDeclaredDependencies.isEmpty()) {
-			logger.info("Used declared dependencies found:");
-
-			logArtifacts(analysis.getUsedAndDeclaredArtifacts(), false);
-		}
-
-		if (!usedButUndeclaredDependencies.isEmpty()) {
-			logger.warn("Used undeclared dependencies found:");
-
-			logArtifacts(usedButUndeclaredDependencies, true);
-		}
-
-		if (!unusedButDeclaredDependencies.isEmpty()) {
-			logger.warn("Unused declared dependencies found:");
-
-			logArtifacts(unusedButDeclaredDependencies, true);
-		}
-
-		writeDependencyXML(usedButUndeclaredDependencies);
+		GraphVizDependencyGraphPrinter graphPrinter = new GraphVizDependencyGraphPrinter();
+		graphPrinter.printGraph(dotSource, type);
 
 		return !usedButUndeclaredDependencies.isEmpty() || !unusedButDeclaredDependencies.isEmpty();
 	}
@@ -99,63 +65,6 @@ public class DependencyPlotter {
 
 		} catch (ProjectDependencyAnalyzerException exception) {
 			throw new MojoExecutionException("Cannot analyze dependencies", exception);
-		}
-	}
-
-	private void logArtifacts(Set<Artifact> artifacts, boolean warn) {
-		if (artifacts.isEmpty()) {
-			logger.info("   None");
-		} else {
-			for (Artifact artifact : artifacts) {
-				// called because artifact will set the version to -SNAPSHOT only if I do this. MNG-2961
-				artifact.isSnapshot();
-
-				if (warn) {
-					logger.warn("   " + artifact);
-				} else {
-					logger.info("   " + artifact);
-				}
-
-			}
-		}
-	}
-
-	private void writeDependencyXML(Set<Artifact> artifacts) {
-		if (!artifacts.isEmpty()) {
-			logger.info("Add the following to your pom to correct the missing dependencies: ");
-
-			StringWriter out = new StringWriter();
-			PrettyPrintXMLWriter writer = new PrettyPrintXMLWriter(out);
-
-			for (Artifact artifact : artifacts) {
-				// called because artifact will set the version to -SNAPSHOT only if I do this. MNG-2961
-				artifact.isSnapshot();
-
-				writer.startElement("dependency");
-				writer.startElement("groupId");
-				writer.writeText(artifact.getGroupId());
-				writer.endElement();
-				writer.startElement("artifactId");
-				writer.writeText(artifact.getArtifactId());
-				writer.endElement();
-				writer.startElement("version");
-				writer.writeText(artifact.getBaseVersion());
-				if (!StringUtils.isBlank(artifact.getClassifier())) {
-					writer.startElement("classifier");
-					writer.writeText(artifact.getClassifier());
-					writer.endElement();
-				}
-				writer.endElement();
-
-				if (!Artifact.SCOPE_COMPILE.equals(artifact.getScope())) {
-					writer.startElement("scope");
-					writer.writeText(artifact.getScope());
-					writer.endElement();
-				}
-				writer.endElement();
-			}
-
-			logger.info("\n" + out.getBuffer());
 		}
 	}
 
