@@ -23,7 +23,7 @@ public class DependencyPlotter {
 		this.dependencyPlotterConfiguration = dependencyPlotterConfiguration;
 	}
 
-	public boolean plotDependencies(MavenProject mavenProjectToAnalyze) throws MojoExecutionException {
+	public DependencyPlotterProjectDependencyAnalysis plotDependencies(MavenProject mavenProjectToAnalyze) throws MojoExecutionException {
 		DependencyPlotterProjectDependencyAnalysis analysis = analyzeMavenProject(mavenProjectToAnalyze);
 
 		analysis.filterDependenciesBasedOnConfiguration(dependencyPlotterConfiguration);
@@ -53,7 +53,7 @@ public class DependencyPlotter {
 		GraphVizDependencyGraphPrinter graphPrinter = new GraphVizDependencyGraphPrinter();
 		graphPrinter.printGraph(dotSource);
 
-		return !usedButUndeclaredDependencies.isEmpty() || !unusedButDeclaredDependencies.isEmpty();
+		return analysis;
 	}
 
 	private DependencyPlotterProjectDependencyAnalysis analyzeMavenProject(MavenProject mavenProjectToAnalyze)

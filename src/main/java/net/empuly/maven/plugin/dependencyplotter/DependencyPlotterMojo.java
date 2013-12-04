@@ -83,14 +83,14 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 			return;
 		}
 
-		boolean dependencyAnalyzationResultedInWarnings = analyzeDependenciesAndPlotThem();
+		DependencyPlotterProjectDependencyAnalysis analysis = analyzeDependenciesAndPlotThem();
 
-		if (dependencyAnalyzationResultedInWarnings && mavenBuildMustFailOnDependencyAnalyzationWarnings) {
-			throw new MojoExecutionException("Dependency analyzation resulted in warnings");
+		if (analysis.hasWarnings() && mavenBuildMustFailOnDependencyAnalyzationWarnings) {
+			throw new MojoExecutionException("Dependency analyzation resulted in warnings.\n" + analysis.printWarnings());
 		}
 	}
 
-	private boolean analyzeDependenciesAndPlotThem() throws MojoExecutionException {
+	private DependencyPlotterProjectDependencyAnalysis analyzeDependenciesAndPlotThem() throws MojoExecutionException {
 
 		DependencyPlotterConfiguration dependencyPlotterConfiguration = new DependencyPlotterConfiguration(
 				ignoreAllButCompileDependenciesDuringAnalyzation,
@@ -109,8 +109,8 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 		ProjectDependencyAnalyzer projectDependencyAnalyzer = lookupProjectDependencyAnalyzerInPlexusContext();
 		DependencyPlotter dependencyPlotter = new DependencyPlotter(projectDependencyAnalyzer,
 				getLog(), dependencyPlotterConfiguration);
-		boolean analyzeResultedInWarnings = dependencyPlotter.plotDependencies(mavenProjectToAnalyze);
-		return analyzeResultedInWarnings;
+		DependencyPlotterProjectDependencyAnalysis dependencyAnalysis = dependencyPlotter.plotDependencies(mavenProjectToAnalyze);
+		return dependencyAnalysis;
 	}
 
 	private boolean isPomProject() {

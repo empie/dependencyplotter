@@ -146,4 +146,37 @@ public class DependencyPlotterProjectDependencyAnalysis {
 		this.projectDependencyAnalysis = projectDependencyAnalysis;
 	}
 
+	public boolean hasWarnings() {
+		return !getUnusedButDeclaredArtifacts().isEmpty() || !getUsedButUndeclaredArtifacts().isEmpty();
+	}
+
+	public String printWarnings() {
+		StringBuilder stringBuilder = new StringBuilder();
+		Set<Artifact> usedButUndeclaredArtifacts = getUsedButUndeclaredArtifacts();
+		if (usedButUndeclaredArtifacts.isEmpty()) {
+			stringBuilder.append("No dependencies used but undeclared");
+			stringBuilder.append("\n");
+			stringBuilder.append("\n");
+		} else {
+			stringBuilder.append("Dependencies used but undeclared:\n");
+			for (Artifact artifact : usedButUndeclaredArtifacts) {
+				stringBuilder.append(artifact.getGroupId() + ":" + artifact.getArtifactId());
+				stringBuilder.append("\n");
+			}
+		}
+		Set<Artifact> unusedButDeclaredArtifacts = getUnusedButDeclaredArtifacts();
+		if (unusedButDeclaredArtifacts.isEmpty()) {
+			stringBuilder.append("No dependencies unused but declared");
+			stringBuilder.append("\n");
+			stringBuilder.append("\n");
+		} else {
+			stringBuilder.append("Dependencies unused but declared:\n");
+			for (Artifact artifact : unusedButDeclaredArtifacts) {
+				stringBuilder.append(artifact.getGroupId() + ":" + artifact.getArtifactId());
+				stringBuilder.append("\n");
+			}
+		}
+		return stringBuilder.toString();
+	}
+
 }
