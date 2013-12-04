@@ -9,29 +9,52 @@ public class GraphVizDependencyGraphBuilder {
 	private static final String NEW_LINE = "&#92;n";
 	private final MavenProject mavenProjectToAnalyze;
 	private final StringBuilder stringBuilder;
+	private final DependencyPlotterConfiguration dependencyPlotterConfiguration;
 
-	public GraphVizDependencyGraphBuilder(MavenProject mavenProjectToAnalyze) {
+	public GraphVizDependencyGraphBuilder(MavenProject mavenProjectToAnalyze, DependencyPlotterConfiguration dependencyPlotterConfiguration) {
 		this.mavenProjectToAnalyze = mavenProjectToAnalyze;
+		this.dependencyPlotterConfiguration = dependencyPlotterConfiguration;
 		stringBuilder = new StringBuilder();
 		addStartOfGraph();
 	}
 
 	public void addUsedAndDeclaredDependency(Artifact artifact) {
-		legLinkVanProjectArtifactNaarDependency(artifact);
-		voegUsedAndDeclaredStyleToe();
-		voegEindeLijnEnNewLineToe();
+		if (dependencyPlotterConfiguration.printUsedAndDeclaredDependencies()) {
+			if (artifactMoetInGraphWordenOpgenomen(artifact)) {
+				legLinkVanProjectArtifactNaarDependency(artifact);
+				voegUsedAndDeclaredStyleToe();
+				voegEindeLijnEnNewLineToe();
+			}
+		}
+	}
+
+	private boolean artifactMoetInGraphWordenOpgenomen(Artifact artifact) {
+		if (dependencyPlotterConfiguration.hasDependencyNamesToIncludeInGraph()) {
+			return new ArtifactHeeftNaamDieStartMetEenVanDeNamenPredicate(
+					dependencyPlotterConfiguration.listOfDependencyNamesToIncludeInGraph()).apply(artifact);
+		} else {
+			return true;
+		}
 	}
 
 	public void addUsedButUndeclaredDependency(Artifact artifact) {
-		legLinkVanProjectArtifactNaarDependency(artifact);
-		voegUsedButUndeclaredStyleToe();
-		voegEindeLijnEnNewLineToe();
+		if (dependencyPlotterConfiguration.printUsedButUndeclaredDependencies()) {
+			if (artifactMoetInGraphWordenOpgenomen(artifact)) {
+				legLinkVanProjectArtifactNaarDependency(artifact);
+				voegUsedButUndeclaredStyleToe();
+				voegEindeLijnEnNewLineToe();
+			}
+		}
 	}
 
 	public void addUnusedButDeclaredDependency(Artifact artifact) {
-		legLinkVanProjectArtifactNaarDependency(artifact);
-		voegUnusedButDeclaredStyleToe();
-		voegEindeLijnEnNewLineToe();
+		if (dependencyPlotterConfiguration.printUnusedButDeclaredDependencies()) {
+			if (artifactMoetInGraphWordenOpgenomen(artifact)) {
+				legLinkVanProjectArtifactNaarDependency(artifact);
+				voegUnusedButDeclaredStyleToe();
+				voegEindeLijnEnNewLineToe();
+			}
+		}
 	}
 
 	public String getDotSource() {
@@ -40,7 +63,9 @@ public class GraphVizDependencyGraphBuilder {
 	}
 
 	private void addStartOfGraph() {
-		stringBuilder.append("digraph G {");
+		stringBuilder.append("digraph G {\n");
+		stringBuilder.append(mavenArtifactAsString(mavenProjectToAnalyze.getArtifact()));
+		voegEindeLijnEnNewLineToe();
 	}
 
 	private void addEndOfGraph() {

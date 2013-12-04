@@ -1,14 +1,11 @@
 package net.empuly.maven.plugin.dependencyplotter;
 
 import java.io.File;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Sets;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class DependencyPlotterConfiguration {
 
@@ -63,15 +60,15 @@ public class DependencyPlotterConfiguration {
 	}
 
 	public boolean hasDependenciesToIgnoreAsUnusedButDeclared() {
-		return dependenciesToIgnoreAsUnusedButDeclared().isEmpty();
+		return !dependenciesToIgnoreAsUnusedButDeclared().isEmpty();
 	}
 
 	public boolean hasDependenciesToIgnoreAsUsedButUndeclared() {
-		return dependenciesToIgnoreAsUsedButUndeclared().isEmpty();
+		return !dependenciesToIgnoreAsUsedButUndeclared().isEmpty();
 	}
 
 	public boolean hasDependencyNamesToIncludeInGraph() {
-		return listOfDependencyNamesToIncludeInGraph().isEmpty();
+		return !listOfDependencyNamesToIncludeInGraph().isEmpty();
 	}
 
 	public boolean ignoreAllButCompileDependenciesDuringAnalyzation() {
@@ -133,10 +130,8 @@ public class DependencyPlotterConfiguration {
 		this.dependenciesToIgnoreAsUsedButUndeclared = convertArrayOfStringDependenciesToSetOfMinimalMavenDependencies(dependenciesToIgnoreAsUsedButUndeclared);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void readListOfDependencyNamesToIncludeInGraph(String[] listOfDependencyNamesToIncludeInGraph) {
-		this.listOfDependencyNamesToIncludeInGraph = new HashSet<MinimalMavenDependencyDescription>(
-				Arrays.asList(listOfDependencyNamesToIncludeInGraph));
+		this.listOfDependencyNamesToIncludeInGraph = convertArrayOfStringDependenciesToSetOfMinimalMavenDependencies(listOfDependencyNamesToIncludeInGraph);
 	}
 
 }

@@ -43,11 +43,11 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 
 	@Parameter(property = "mavenBuildMustFailOnDependencyAnalyzationWarnings", defaultValue = "false")
 	private boolean mavenBuildMustFailOnDependencyAnalyzationWarnings;
-	@Parameter(property = "printUsedButUndeclaredDependencies", defaultValue = "false")
+	@Parameter(property = "printUsedButUndeclaredDependencies", defaultValue = "true")
 	private boolean printUsedButUndeclaredDependencies;
-	@Parameter(property = "printUnusedButDeclaredDependencies", defaultValue = "false")
+	@Parameter(property = "printUnusedButDeclaredDependencies", defaultValue = "true")
 	private boolean printUnusedButDeclaredDependencies;
-	@Parameter(property = "printUsedAndDeclaredDependencies", defaultValue = "false")
+	@Parameter(property = "printUsedAndDeclaredDependencies", defaultValue = "true")
 	private boolean printUsedAndDeclaredDependencies;
 
 	@Parameter(defaultValue = "${project.build.directory}", readonly = true)

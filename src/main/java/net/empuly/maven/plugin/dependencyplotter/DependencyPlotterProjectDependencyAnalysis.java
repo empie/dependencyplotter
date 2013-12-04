@@ -41,7 +41,6 @@ public class DependencyPlotterProjectDependencyAnalysis {
 
 	private void filterOnScopes(DependencyPlotterConfiguration dependencyPlotterConfiguration) {
 		if (dependencyPlotterConfiguration.ignoreAllButCompileDependenciesDuringAnalyzation()) {
-			logger.info("filtering all but compile and keeping");
 			filterAllButCompileScope();
 		} else {
 			filterOnIndividualScopes(dependencyPlotterConfiguration);
@@ -73,17 +72,12 @@ public class DependencyPlotterProjectDependencyAnalysis {
 	}
 
 	private void filterAllDependenciesInScope(String scopeToFilter) {
-		logger.info("filtering all dependencies in scope " + scopeToFilter);
 		Set<Artifact> unusedButDeclaredArtifacts = filterAllDependenciesInScope(projectDependencyAnalysis.getUnusedDeclaredArtifacts(),
 				scopeToFilter);
 		Set<Artifact> usedButUndeclaredArtifacts = filterAllDependenciesInScope(projectDependencyAnalysis.getUsedUndeclaredArtifacts(),
 				scopeToFilter);
 		Set<Artifact> usedAndDeclaredArtifacts = filterAllDependenciesInScope(projectDependencyAnalysis.getUsedDeclaredArtifacts(),
 				scopeToFilter);
-
-		logger.info(usedAndDeclaredArtifacts.toString());
-		logger.info(usedButUndeclaredArtifacts.toString());
-		logger.info(unusedButDeclaredArtifacts.toString());
 
 		updateProjectDependencyAnalysis(usedAndDeclaredArtifacts, usedButUndeclaredArtifacts, unusedButDeclaredArtifacts);
 	}

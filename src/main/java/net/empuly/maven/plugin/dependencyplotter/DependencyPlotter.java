@@ -32,7 +32,8 @@ public class DependencyPlotter {
 		Set<Artifact> usedButUndeclaredDependencies = analysis.getUsedButUndeclaredArtifacts();
 		Set<Artifact> unusedButDeclaredDependencies = analysis.getUnusedButDeclaredArtifacts();
 
-		GraphVizDependencyGraphBuilder graphBuilder = new GraphVizDependencyGraphBuilder(mavenProjectToAnalyze);
+		GraphVizDependencyGraphBuilder graphBuilder = new GraphVizDependencyGraphBuilder(mavenProjectToAnalyze,
+				dependencyPlotterConfiguration);
 
 		for (Artifact artifact : usedAndDeclaredDependencies) {
 			graphBuilder.addUsedAndDeclaredDependency(artifact);
@@ -47,12 +48,10 @@ public class DependencyPlotter {
 		}
 
 		String dotSource = graphBuilder.getDotSource();
-		System.out.println(dotSource);
-
-		String type = "gif";
+		logger.info(dotSource);
 
 		GraphVizDependencyGraphPrinter graphPrinter = new GraphVizDependencyGraphPrinter();
-		graphPrinter.printGraph(dotSource, type);
+		graphPrinter.printGraph(dotSource);
 
 		return !usedButUndeclaredDependencies.isEmpty() || !unusedButDeclaredDependencies.isEmpty();
 	}
