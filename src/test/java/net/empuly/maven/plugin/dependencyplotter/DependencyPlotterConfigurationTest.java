@@ -19,21 +19,21 @@ public class DependencyPlotterConfigurationTest {
 	// String[] dependenciesToIgnoreAsUnusedButDeclared,
 	// String[] dependenciesToIgnoreAsUsedButUndeclared
 
-	@Test
-	public void kanDependencyPlotterConfigurationAanmaken() {
-		DependencyPlotterConfiguration dependencyPlotterConfiguration = new DependencyPlotterConfiguration(
-				true,
-				true,
-				true,
-				true,
-				true,
-				true,
-				true,
-				true,
-				new File("koekoek"),
-				new String[] { "dependencyToExcludeGroupId:dependencyToExcludeArtifactId" },
-				new String[] {},
-				new String[] {});
-
-	}
+//	@Test
+//	public void kanDependencyPlotterConfigurationAanmaken() {
+//		DependencyPlotterConfiguration dependencyPlotterConfiguration = new DependencyPlotterConfiguration(
+//				true,
+//				true,
+//				true,
+//				true,
+//				true,
+//				true,
+//				true,
+//				true,
+//				new File("koekoek"),
+//				new String[] { "dependencyToExcludeGroupId:dependencyToExcludeArtifactId" },
+//				new String[] {},
+//				new String[] {});
+//
+//	}
 }

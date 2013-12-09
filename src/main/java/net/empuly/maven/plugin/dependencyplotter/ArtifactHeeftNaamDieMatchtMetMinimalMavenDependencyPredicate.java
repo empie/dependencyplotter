@@ -7,11 +7,13 @@ import org.apache.maven.artifact.Artifact;
 
 import com.google.common.base.Predicate;
 
-public class ArtifactHeeftNaamDieMatchtMetMinimalMavenDependencyPredicate implements Predicate<Artifact> {
+public class ArtifactHeeftNaamDieMatchtMetMinimalMavenDependencyPredicate
+		implements Predicate<Artifact> {
 
 	private final MinimalMavenDependencyDescription minimalMavenDependencyDescription;
 
-	public ArtifactHeeftNaamDieMatchtMetMinimalMavenDependencyPredicate(MinimalMavenDependencyDescription minimalMavenDependencyDescription) {
+	public ArtifactHeeftNaamDieMatchtMetMinimalMavenDependencyPredicate(
+			MinimalMavenDependencyDescription minimalMavenDependencyDescription) {
 		checkNotNull(minimalMavenDependencyDescription);
 		this.minimalMavenDependencyDescription = minimalMavenDependencyDescription;
 	}
@@ -21,8 +23,21 @@ public class ArtifactHeeftNaamDieMatchtMetMinimalMavenDependencyPredicate implem
 		String artifactId = artifact.getArtifactId();
 		String groupId = artifact.getGroupId();
 
-		boolean matchOpGroupId = StringUtils.contains(groupId, minimalMavenDependencyDescription.getGroupId());
-		boolean matchOpArtifactId = StringUtils.contains(artifactId, minimalMavenDependencyDescription.getArtifactId());
+		boolean matchOpGroupId;
+		if ("*".equals(minimalMavenDependencyDescription.getGroupId())) {
+			matchOpGroupId = true;
+		} else {
+			matchOpGroupId = StringUtils.contains(groupId,
+					minimalMavenDependencyDescription.getGroupId());
+		}
+
+		boolean matchOpArtifactId;
+		if ("*".equals(minimalMavenDependencyDescription.getArtifactId())) {
+			matchOpArtifactId = true;
+		} else {
+			matchOpArtifactId = StringUtils.contains(artifactId,
+					minimalMavenDependencyDescription.getArtifactId());
+		}
 		return matchOpGroupId && matchOpArtifactId;
 	}
 

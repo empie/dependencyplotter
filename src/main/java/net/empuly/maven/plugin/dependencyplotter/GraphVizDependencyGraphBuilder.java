@@ -32,7 +32,11 @@ public class GraphVizDependencyGraphBuilder {
 		if (dependencyPlotterConfiguration.hasDependencyNamesToIncludeInGraph()) {
 			return new ArtifactHeeftNaamDieStartMetEenVanDeNamenPredicate(
 					dependencyPlotterConfiguration.listOfDependencyNamesToIncludeInGraph()).apply(artifact);
-		} else {
+		} else if (dependencyPlotterConfiguration.hasDependencyNamesToExcludeInGraph()) {
+			return !( new ArtifactHeeftNaamDieStartMetEenVanDeNamenPredicate(
+					dependencyPlotterConfiguration.listOfDependencyNamesToExcludeInGraph()).apply(artifact));
+		}
+		else{
 			return true;
 		}
 	}

@@ -55,6 +55,8 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 
 	@Parameter(property = "listOfDependencyNamesToIncludeInGraph")
 	private String[] listOfDependencyNamesToIncludeInGraph;
+	@Parameter(property = "listOfDependencyNamesToExcludeInGraph")
+	private String[] listOfDependencyNamesToExcludeInGraph;
 	@Parameter(property = "dependenciesToIgnoreAsUnusedButDeclared")
 	private String[] dependenciesToIgnoreAsUnusedButDeclared;
 	@Parameter(property = "dependenciesToIgnoreAsUsedButUndeclared")
@@ -103,6 +105,7 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 				printUsedButUndeclaredDependencies,
 				targetDirectory,
 				listOfDependencyNamesToIncludeInGraph,
+				listOfDependencyNamesToExcludeInGraph,
 				dependenciesToIgnoreAsUnusedButDeclared,
 				dependenciesToIgnoreAsUsedButUndeclared);
 

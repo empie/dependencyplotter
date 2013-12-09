@@ -10,7 +10,7 @@ public class GraphVizDependencyGraphPrinter {
 
 	private static String GRAPHVIZ_DOT_EXE_LOCATION = "C:/Program Files (x86)/Graphviz2.34/bin/dot.exe";
 
-	private static String OUTPUT_DIRECTORY = "C:/development/dependencyplotter-maven-plugin/sources/output/";
+	private static String OUTPUT_DIRECTORY = "C:/PrivateWS/jozef/output";
 
 	public void printGraph(String dotSource) {
 		try {
