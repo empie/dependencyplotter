@@ -19,9 +19,10 @@ public class DependencyPlotterConfiguration {
 	private final boolean printUsedButUndeclaredDependencies;
 	private Set<MinimalMavenDependencyDescription> listOfDependencyNamesToIncludeInGraph;
 	private Set<MinimalMavenDependencyDescription> listOfDependencyNamesToExcludeInGraph;
-	private final File targetDirectory;
+	private final File plotOutputDirectory;
 	private Set<MinimalMavenDependencyDescription> dependenciesToIgnoreAsUsedButUndeclared;
 	private Set<MinimalMavenDependencyDescription> dependenciesToIgnoreAsUnusedButDeclared;
+	private boolean plotGraph;
 
 	public DependencyPlotterConfiguration(
 			boolean ignoreAllButCompileDependenciesDuringAnalyzation,
@@ -29,10 +30,11 @@ public class DependencyPlotterConfiguration {
 			boolean ignoreTestDependenciesDuringAnalyzation,
 			boolean ignoreRuntimeDependenciesDuringAnalyzation,
 			boolean ignoreProvidedDependenciesDuringAnalyzation,
+			boolean plotGraph,
 			boolean printUsedAndDeclaredDependencies,
 			boolean printUnusedButDeclaredDependencies,
 			boolean printUsedButUndeclaredDependencies,
-			File targetDirectory,
+			File plotOutputDirectory,
 			String[] listOfDependencyNamesToIncludeInGraph,
 			String[] listOfDependencyNamesToExcludeInGraph,
 			String[] dependenciesToIgnoreAsUnusedButDeclared,
@@ -42,10 +44,11 @@ public class DependencyPlotterConfiguration {
 		this.ignoreTestDependenciesDuringAnalyzation = ignoreTestDependenciesDuringAnalyzation;
 		this.ignoreRuntimeDependenciesDuringAnalyzation = ignoreRuntimeDependenciesDuringAnalyzation;
 		this.ignoreProvidedDependenciesDuringAnalyzation = ignoreProvidedDependenciesDuringAnalyzation;
+		this.plotGraph = plotGraph;
 		this.printUsedAndDeclaredDependencies = printUsedAndDeclaredDependencies;
 		this.printUnusedButDeclaredDependencies = printUnusedButDeclaredDependencies;
 		this.printUsedButUndeclaredDependencies = printUsedButUndeclaredDependencies;
-		this.targetDirectory = targetDirectory;
+		this.plotOutputDirectory = plotOutputDirectory;
 
 		readListOfDependencyNamesToIncludeInGraph(listOfDependencyNamesToIncludeInGraph);
 		readListOfDependencyNamesToExcludeInGraph(listOfDependencyNamesToExcludeInGraph);
@@ -76,6 +79,10 @@ public class DependencyPlotterConfiguration {
 	
 	public boolean hasDependencyNamesToExcludeInGraph() {
 		return !listOfDependencyNamesToExcludeInGraph().isEmpty();
+	}
+	
+	public boolean plotGraph() {
+		return plotGraph;
 	}
 
 	public boolean ignoreAllButCompileDependenciesDuringAnalyzation() {
@@ -118,8 +125,8 @@ public class DependencyPlotterConfiguration {
 		return printUsedButUndeclaredDependencies;
 	}
 
-	public File targetDirectory() {
-		return targetDirectory;
+	public File plotOutputDirectory() {
+		return plotOutputDirectory;
 	}
 
 	private Set<MinimalMavenDependencyDescription> convertArrayOfStringDependenciesToSetOfMinimalMavenDependencies(

@@ -1,16 +1,20 @@
 package net.empuly.maven.plugin.dependencyplotter;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 public class DependencyPlotterProjectDependencyAnalysis {
 
@@ -111,27 +115,30 @@ public class DependencyPlotterProjectDependencyAnalysis {
 		}
 	}
 
+	
 	private void ignoreDependencyAsUsedButUndeclared(MinimalMavenDependencyDescription dependencyToIgnoreAsUsedButUndeclared) {
 		Set<Artifact> usedUndeclaredArtifacts = projectDependencyAnalysis.getUsedUndeclaredArtifacts();
 		Set<Artifact> usedDeclaredArtifacts = projectDependencyAnalysis.getUsedDeclaredArtifacts();
-		moveDependencyFromFirstToSecondSetIfFound(dependencyToIgnoreAsUsedButUndeclared, usedUndeclaredArtifacts, usedDeclaredArtifacts);
+		Set<Artifact> artifactsToIgnore = Sets.newHashSet(Collections2.filter(usedUndeclaredArtifacts, new ArtifactHeeftNaamDieMatchtMetMinimalMavenDependencyPredicate(dependencyToIgnoreAsUsedButUndeclared)));
+		Iterable<Artifact> filter = Iterables.filter(usedUndeclaredArtifacts, Predicates.not(Predicates.in(artifactsToIgnore)));
+		Set<Artifact> filteredUsedUndeclaredArtifacts = Sets.newHashSet(filter);
+		Set<Artifact> newUsedDeclaredArtifacts = Sets.newHashSet(usedDeclaredArtifacts);
+		newUsedDeclaredArtifacts.addAll(artifactsToIgnore);
+		updateProjectDependencyAnalysis(newUsedDeclaredArtifacts, filteredUsedUndeclaredArtifacts, projectDependencyAnalysis.getUnusedDeclaredArtifacts());
+		
 	}
 
 	private void ignoreDependencyAsUnusedButDeclared(MinimalMavenDependencyDescription dependencyToIgnoreAsUnusedButDeclared) {
 		Set<Artifact> unusedDeclaredArtifacts = projectDependencyAnalysis.getUnusedDeclaredArtifacts();
 		Set<Artifact> usedDeclaredArtifacts = projectDependencyAnalysis.getUsedDeclaredArtifacts();
-		moveDependencyFromFirstToSecondSetIfFound(dependencyToIgnoreAsUnusedButDeclared, unusedDeclaredArtifacts, usedDeclaredArtifacts);
+		Set<Artifact> artifactsToIgnore = Sets.newHashSet(Collections2.filter(unusedDeclaredArtifacts, new ArtifactHeeftNaamDieMatchtMetMinimalMavenDependencyPredicate(dependencyToIgnoreAsUnusedButDeclared)));
+		Iterable<Artifact> filter = Iterables.filter(unusedDeclaredArtifacts, Predicates.not(Predicates.in(artifactsToIgnore)));
+		Set<Artifact> filteredUnusedDeclaredArtifacts = Sets.newHashSet(filter);
+		Set<Artifact> newUsedDeclaredArtifacts = Sets.newHashSet(usedDeclaredArtifacts);
+		newUsedDeclaredArtifacts.addAll(artifactsToIgnore);
+		updateProjectDependencyAnalysis(newUsedDeclaredArtifacts, projectDependencyAnalysis.getUsedUndeclaredArtifacts(), filteredUnusedDeclaredArtifacts);
 	}
 
-	private void moveDependencyFromFirstToSecondSetIfFound(MinimalMavenDependencyDescription dependencyToMove,
-			Set<Artifact> setToFilterFrom, Set<Artifact> setToMoveDependencyTo) {
-		Artifact foundDependencyToIgnore = Iterables.find(setToFilterFrom, new IsDependencyPredicate(dependencyToMove));
-		if (foundDependencyToIgnore != null) {
-			boolean removeSuccess = setToFilterFrom.remove(foundDependencyToIgnore);
-			Preconditions.checkArgument(removeSuccess);
-			setToMoveDependencyTo.add(foundDependencyToIgnore);
-		}
-	}
 
 	// Update methods
 

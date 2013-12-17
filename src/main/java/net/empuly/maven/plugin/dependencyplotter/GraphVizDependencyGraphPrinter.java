@@ -1,8 +1,10 @@
 package net.empuly.maven.plugin.dependencyplotter;
 
 import java.io.File;
+import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.project.MavenProject;
 
 public class GraphVizDependencyGraphPrinter {
 
@@ -11,6 +13,16 @@ public class GraphVizDependencyGraphPrinter {
 	private static String GRAPHVIZ_DOT_EXE_LOCATION = "C:/Program Files (x86)/Graphviz2.34/bin/dot.exe";
 
 	private static String OUTPUT_DIRECTORY = "C:/PrivateWS/jozef/output";
+
+	private DependencyPlotterConfiguration dependencyPlotterConfiguration;
+
+	private MavenProject mavenProjectToAnalyze;
+
+	public GraphVizDependencyGraphPrinter(
+			DependencyPlotterConfiguration dependencyPlotterConfiguration, MavenProject mavenProjectToAnalyze) {
+				this.dependencyPlotterConfiguration = dependencyPlotterConfiguration;
+				this.mavenProjectToAnalyze = mavenProjectToAnalyze;
+	}
 
 	public void printGraph(String dotSource) {
 		try {
@@ -25,7 +37,7 @@ public class GraphVizDependencyGraphPrinter {
 			Process graphVizProcess = runtime.exec(args);
 			graphVizProcess.waitFor();
 
-			FileUtils.copyFile(tempFileOutputImage, new File(OUTPUT_DIRECTORY, "output." + TYPE));
+			FileUtils.copyFile(tempFileOutputImage, new File(dependencyPlotterConfiguration.plotOutputDirectory(), outputFileName()+"." + TYPE));
 			FileUtils.forceDelete(tempFileOutputImage);
 			FileUtils.forceDelete(tempFileDotSource);
 
@@ -35,6 +47,10 @@ public class GraphVizDependencyGraphPrinter {
 			throw new RuntimeException(ie);
 		}
 
+	}
+
+	private String outputFileName() {
+		return mavenProjectToAnalyze.getGroupId()+"_"+mavenProjectToAnalyze.getArtifactId();
 	}
 
 }

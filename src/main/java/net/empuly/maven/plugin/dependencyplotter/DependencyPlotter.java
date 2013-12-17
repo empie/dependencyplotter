@@ -1,7 +1,5 @@
 package net.empuly.maven.plugin.dependencyplotter;
 
-import java.util.Set;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -16,54 +14,66 @@ public class DependencyPlotter {
 	private final Log logger;
 	private final DependencyPlotterConfiguration dependencyPlotterConfiguration;
 
-	public DependencyPlotter(ProjectDependencyAnalyzer projectDependencyAnalyzer, Log logger,
+	public DependencyPlotter(
+			ProjectDependencyAnalyzer projectDependencyAnalyzer, Log logger,
 			DependencyPlotterConfiguration dependencyPlotterConfiguration) {
 		this.projectDependencyAnalyzer = projectDependencyAnalyzer;
 		this.logger = logger;
 		this.dependencyPlotterConfiguration = dependencyPlotterConfiguration;
 	}
 
-	public DependencyPlotterProjectDependencyAnalysis plotDependencies(MavenProject mavenProjectToAnalyze) throws MojoExecutionException {
+	public DependencyPlotterProjectDependencyAnalysis analyzeAndPlotDependencies(
+			MavenProject mavenProjectToAnalyze) throws MojoExecutionException {
 		DependencyPlotterProjectDependencyAnalysis analysis = analyzeMavenProject(mavenProjectToAnalyze);
 
 		analysis.filterDependenciesBasedOnConfiguration(dependencyPlotterConfiguration);
 
-		Set<Artifact> usedAndDeclaredDependencies = analysis.getUsedAndDeclaredArtifacts();
-		Set<Artifact> usedButUndeclaredDependencies = analysis.getUsedButUndeclaredArtifacts();
-		Set<Artifact> unusedButDeclaredDependencies = analysis.getUnusedButDeclaredArtifacts();
-
-		GraphVizDependencyGraphBuilder graphBuilder = new GraphVizDependencyGraphBuilder(mavenProjectToAnalyze,
-				dependencyPlotterConfiguration);
-
-		for (Artifact artifact : usedAndDeclaredDependencies) {
-			graphBuilder.addUsedAndDeclaredDependency(artifact);
-		}
-
-		for (Artifact artifact : usedButUndeclaredDependencies) {
-			graphBuilder.addUsedButUndeclaredDependency(artifact);
-		}
-
-		for (Artifact artifact : unusedButDeclaredDependencies) {
-			graphBuilder.addUnusedButDeclaredDependency(artifact);
-		}
-
-		String dotSource = graphBuilder.getDotSource();
-		logger.info(dotSource);
-
-		GraphVizDependencyGraphPrinter graphPrinter = new GraphVizDependencyGraphPrinter();
-		graphPrinter.printGraph(dotSource);
+		plotGraph(mavenProjectToAnalyze, analysis);
 
 		return analysis;
 	}
 
-	private DependencyPlotterProjectDependencyAnalysis analyzeMavenProject(MavenProject mavenProjectToAnalyze)
-			throws MojoExecutionException {
+	private void plotGraph(MavenProject mavenProjectToAnalyze,
+			DependencyPlotterProjectDependencyAnalysis analysis) {
+		if (dependencyPlotterConfiguration.plotGraph()) {
+
+			GraphVizDependencyGraphBuilder graphBuilder = new GraphVizDependencyGraphBuilder(
+					mavenProjectToAnalyze, dependencyPlotterConfiguration);
+
+			for (Artifact artifact : analysis
+					.getUsedAndDeclaredArtifacts()) {
+				graphBuilder.addUsedAndDeclaredDependency(artifact);
+			}
+
+			for (Artifact artifact : analysis
+					.getUsedButUndeclaredArtifacts()) {
+				graphBuilder.addUsedButUndeclaredDependency(artifact);
+			}
+
+			for (Artifact artifact : analysis
+					.getUnusedButDeclaredArtifacts()) {
+				graphBuilder.addUnusedButDeclaredDependency(artifact);
+			}
+
+			String dotSource = graphBuilder.getDotSource();
+			logger.info(dotSource);
+
+			GraphVizDependencyGraphPrinter graphPrinter = new GraphVizDependencyGraphPrinter(dependencyPlotterConfiguration, mavenProjectToAnalyze);
+			graphPrinter.printGraph(dotSource);
+		}
+	}
+
+	private DependencyPlotterProjectDependencyAnalysis analyzeMavenProject(
+			MavenProject mavenProjectToAnalyze) throws MojoExecutionException {
 		try {
-			ProjectDependencyAnalysis analysis = projectDependencyAnalyzer.analyze(mavenProjectToAnalyze);
-			return new DependencyPlotterProjectDependencyAnalysis(analysis, logger);
+			ProjectDependencyAnalysis analysis = projectDependencyAnalyzer
+					.analyze(mavenProjectToAnalyze);
+			return new DependencyPlotterProjectDependencyAnalysis(analysis,
+					logger);
 
 		} catch (ProjectDependencyAnalyzerException exception) {
-			throw new MojoExecutionException("Cannot analyze dependencies", exception);
+			throw new MojoExecutionException("Cannot analyze dependencies",
+					exception);
 		}
 	}
 

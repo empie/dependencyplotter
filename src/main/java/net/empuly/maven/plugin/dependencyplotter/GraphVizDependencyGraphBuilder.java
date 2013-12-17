@@ -55,11 +55,17 @@ public class GraphVizDependencyGraphBuilder {
 		if (dependencyPlotterConfiguration.printUnusedButDeclaredDependencies()) {
 			if (artifactMoetInGraphWordenOpgenomen(artifact)) {
 				legLinkVanProjectArtifactNaarDependency(artifact);
-				voegUnusedButDeclaredStyleToe();
+				if( artifact.getScope().equals(Artifact.SCOPE_RUNTIME)) {
+					voegRuntimeStyleToe();
+				}else{					
+					voegUnusedButDeclaredStyleToe();
+				}
 				voegEindeLijnEnNewLineToe();
 			}
 		}
 	}
+
+	
 
 	public String getDotSource() {
 		addEndOfGraph();
@@ -94,6 +100,10 @@ public class GraphVizDependencyGraphBuilder {
 
 	private void voegUnusedButDeclaredStyleToe() {
 		stringBuilder.append(" [color=\"red\"]");
+	}
+	
+	private void voegRuntimeStyleToe() {
+		stringBuilder.append(" [color=\"orange\"]");
 	}
 
 	private void voegUsedButUndeclaredStyleToe() {

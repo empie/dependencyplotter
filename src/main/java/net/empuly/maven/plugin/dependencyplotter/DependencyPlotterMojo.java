@@ -41,6 +41,8 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 	@Parameter(property = "ignoreProvidedDependenciesDuringAnalyzation", defaultValue = "false")
 	private boolean ignoreProvidedDependenciesDuringAnalyzation;
 
+	@Parameter(property = "plotGraph", defaultValue = "false")
+	private boolean plotGraph;
 	@Parameter(property = "mavenBuildMustFailOnDependencyAnalyzationWarnings", defaultValue = "false")
 	private boolean mavenBuildMustFailOnDependencyAnalyzationWarnings;
 	@Parameter(property = "printUsedButUndeclaredDependencies", defaultValue = "true")
@@ -50,8 +52,8 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 	@Parameter(property = "printUsedAndDeclaredDependencies", defaultValue = "true")
 	private boolean printUsedAndDeclaredDependencies;
 
-	@Parameter(defaultValue = "${project.build.directory}", readonly = true)
-	private File targetDirectory;
+	@Parameter(property = "plotOutputDirectory" , defaultValue = "${project.build.directory}")
+	private File plotOutputDirectory;
 
 	@Parameter(property = "listOfDependencyNamesToIncludeInGraph")
 	private String[] listOfDependencyNamesToIncludeInGraph;
@@ -62,8 +64,8 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 	@Parameter(property = "dependenciesToIgnoreAsUsedButUndeclared")
 	private String[] dependenciesToIgnoreAsUsedButUndeclared;
 
-	@Parameter(property = "mdep.analyze.skip", defaultValue = "false")
-	private boolean skip;
+	@Parameter(property = "skipPlugin", defaultValue = "false")
+	private boolean skipPlugin;
 
 	public void contextualize(Context context) throws ContextException {
 		plexusContext = context;
@@ -73,6 +75,8 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 		if (skipDependencyPlotterExecution()) {
 			getLog().info("Skipping plugin execution");
 			return;
+		}else{
+			System.out.println("skipPlugin: " + skipPlugin);
 		}
 
 		if (isPomProject()) {
@@ -80,8 +84,8 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 			return;
 		}
 
-		if (noValidTargetDirectory()) {
-			getLog().info("Skipping project with no build directory. First execute mvn clean install");
+		if (noValidPlotOutputDirectory()) {
+			getLog().info("Skipping project with no noValidPlotOutputDirectory directory. First execute mvn clean install");
 			return;
 		}
 
@@ -100,10 +104,11 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 				ignoreTestDependenciesDuringAnalyzation,
 				ignoreRuntimeDependenciesDuringAnalyzation,
 				ignoreProvidedDependenciesDuringAnalyzation,
+				plotGraph,
 				printUsedAndDeclaredDependencies,
 				printUnusedButDeclaredDependencies,
 				printUsedButUndeclaredDependencies,
-				targetDirectory,
+				plotOutputDirectory,
 				listOfDependencyNamesToIncludeInGraph,
 				listOfDependencyNamesToExcludeInGraph,
 				dependenciesToIgnoreAsUnusedButDeclared,
@@ -112,7 +117,7 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 		ProjectDependencyAnalyzer projectDependencyAnalyzer = lookupProjectDependencyAnalyzerInPlexusContext();
 		DependencyPlotter dependencyPlotter = new DependencyPlotter(projectDependencyAnalyzer,
 				getLog(), dependencyPlotterConfiguration);
-		DependencyPlotterProjectDependencyAnalysis dependencyAnalysis = dependencyPlotter.plotDependencies(mavenProjectToAnalyze);
+		DependencyPlotterProjectDependencyAnalysis dependencyAnalysis = dependencyPlotter.analyzeAndPlotDependencies(mavenProjectToAnalyze);
 		return dependencyAnalysis;
 	}
 
@@ -130,11 +135,11 @@ public class DependencyPlotterMojo extends AbstractMojo implements Contextualiza
 		}
 	}
 
-	private boolean noValidTargetDirectory() {
-		return targetDirectory == null || !targetDirectory.exists();
+	private boolean noValidPlotOutputDirectory() {
+		return plotOutputDirectory == null || !plotOutputDirectory.exists();
 	}
 
 	private boolean skipDependencyPlotterExecution() {
-		return skip;
+		return skipPlugin;
 	}
 }
