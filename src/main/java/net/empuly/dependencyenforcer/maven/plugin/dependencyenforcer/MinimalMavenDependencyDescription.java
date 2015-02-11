@@ -1,4 +1,4 @@
-package net.empuly.maven.plugin.dependencyplotter;
+package net.empuly.dependencyenforcer.maven.plugin.dependencyenforcer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
